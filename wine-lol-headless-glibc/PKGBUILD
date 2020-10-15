@@ -2,11 +2,11 @@
 # Maintainer: Manuel Reimer <mail+wine@m-reimer.de>
 
 # This PKGBUILD builds a glibc with a "hack" required to run League Of Legends
-# with wine-staging (wine-lol)
+# with wine-staging (wine-lol-headless)
 # See: https://bugs.winehq.org/show_bug.cgi?id=47198#c17
 
-pkgname=wine-lol-glibc
-pkgdesc='GNU C Library patched for wine-lol'
+pkgname=wine-lol-headless-glibc
+pkgdesc='GNU C Library patched for wine-lol-headless'
 pkgver=2.32
 pkgrel=2
 arch=(x86_64)
@@ -19,7 +19,7 @@ options=(!strip staticlibs)
 #_commit=067fc32968b601493f4b247a3ac00caeea3f3d61
 #source=(git+https://sourceware.org/git/glibc.git#commit=$_commit
 source=(https://ftp.gnu.org/gnu/glibc/glibc-$pkgver.tar.xz
-        wine-lol-poc1-glibc.diff::https://bugs.winehq.org/attachment.cgi?id=64482)
+        wine-lol-headless-poc1-glibc.diff::https://bugs.winehq.org/attachment.cgi?id=64482)
 md5sums=('720c7992861c57cf97d66a2f36d8d1fa'
          '65e6d204ab9ad787c8dce999c4ba5c17')
 
@@ -38,13 +38,13 @@ prepare() {
     esac
   done
 
-  # Add wine-lol glibc hack
-  patch -p1 -i "$srcdir/wine-lol-poc1-glibc.diff"
+  # Add wine-lol-headless glibc hack
+  patch -p1 -i "$srcdir/wine-lol-headless-poc1-glibc.diff"
 }
 
 build() {
   local _configure_flags=(
-      --prefix=/opt/wine-lol
+      --prefix=/opt/wine-lol-headless
       --sysconfdir=/etc
       --datarootdir=/usr/share
       --with-headers=/usr/include
@@ -64,10 +64,10 @@ build() {
   export CC="gcc -m32 -mstackrealign"
   export CXX="g++ -m32 -mstackrealign"
 
-  echo "slibdir=/opt/wine-lol/lib32" >> configparms
-  echo "rtlddir=/opt/wine-lol/lib32" >> configparms
-  echo "sbindir=/opt/wine-lol/bin" >> configparms
-  echo "rootsbindir=/opt/wine-lol/bin" >> configparms
+  echo "slibdir=/opt/wine-lol-headless/lib32" >> configparms
+  echo "rtlddir=/opt/wine-lol-headless/lib32" >> configparms
+  echo "sbindir=/opt/wine-lol-headless/bin" >> configparms
+  echo "rootsbindir=/opt/wine-lol-headless/bin" >> configparms
 
   # remove fortify for building libraries
   CPPFLAGS=${CPPFLAGS/-D_FORTIFY_SOURCE=2/}
@@ -76,8 +76,8 @@ build() {
 
   "$srcdir/glibc/configure" \
       --host=i686-pc-linux-gnu \
-      --libdir=/opt/wine-lol/lib32 \
-      --libexecdir=/opt/wine-lol/lib32 \
+      --libdir=/opt/wine-lol-headless/lib32 \
+      --libexecdir=/opt/wine-lol-headless/lib32 \
       ${_configure_flags[@]}
 
   # build libraries with fortify disabled
@@ -98,18 +98,18 @@ package() {
   make install_root="$pkgdir" install
 
   # Dynamic linker
-#  install -d "$pkgdir/opt/wine-lol/lib"
-#  ln -s ../lib32/ld-linux.so.2 "$pkgdir/opt/wine-lol/lib/"
+#  install -d "$pkgdir/opt/wine-lol-headless/lib"
+#  ln -s ../lib32/ld-linux.so.2 "$pkgdir/opt/wine-lol-headless/lib/"
 
-  # Symlink /opt/wine-lol/lib32/locale to /usr/lib/locale
-  ln -s /usr/lib/locale "$pkgdir/opt/wine-lol/lib32/locale"
+  # Symlink /opt/wine-lol-headless/lib32/locale to /usr/lib/locale
+  ln -s /usr/lib/locale "$pkgdir/opt/wine-lol-headless/lib32/locale"
 
   if check_option 'debug' n; then
-    find "$pkgdir"/opt/wine-lol/bin -type f -executable -exec strip $STRIP_BINARIES {} + 2> /dev/null || true
-    find "$pkgdir"/opt/wine-lol/lib -name '*.a' -type f -exec strip $STRIP_STATIC {} + 2> /dev/null || true
+    find "$pkgdir"/opt/wine-lol-headless/bin -type f -executable -exec strip $STRIP_BINARIES {} + 2> /dev/null || true
+    find "$pkgdir"/opt/wine-lol-headless/lib -name '*.a' -type f -exec strip $STRIP_STATIC {} + 2> /dev/null || true
 
-    find "$pkgdir"/opt/wine-lol/lib32 -name '*.a' -type f -exec strip $STRIP_STATIC {} + 2> /dev/null || true
-    find "$pkgdir"/opt/wine-lol/lib32 \
+    find "$pkgdir"/opt/wine-lol-headless/lib32 -name '*.a' -type f -exec strip $STRIP_STATIC {} + 2> /dev/null || true
+    find "$pkgdir"/opt/wine-lol-headless/lib32 \
       -not -name 'ld-*.so' \
       -not -name 'libc-*.so' \
       -not -name 'libpthread-*.so' \
@@ -124,5 +124,5 @@ package() {
   rmdir "$pkgdir/usr" # should be empty now
 
   # Provided by lib32-libxcrypt;
-  rm -f "$pkgdir"/opt/wine-lol/lib32/libcrypt.{a,so}
+  rm -f "$pkgdir"/opt/wine-lol-headless/lib32/libcrypt.{a,so}
 }

@@ -3,8 +3,8 @@ PKGPATH?=../repo
 wine_VERSION=5.6-1
 glibc_VERSION=2.32-2
 
-wine_NAME=wine-lol
-glibc_NAME=wine-lol-glibc
+wine_NAME=wine-lol-headless
+glibc_NAME=wine-lol-headless-glibc
 
 .PHONY: all
 all: checkpath tempdir wine glibc
@@ -17,11 +17,11 @@ ifeq ($(strip $(PKGPATH)),)
 	@echo "make PKGPATH=[PATH_TO_ARCH_REPO]"
 	@exit 1
 endif
-ifeq ($(wildcard $(PKGPATH)/wine-lol-$(wine_VERSION)-x86_64.pkg.tar.xz),)
+ifeq ($(wildcard $(PKGPATH)/wine-lol-headless-$(wine_VERSION)-x86_64.pkg.tar.zst),)
 	@echo "Wine package missing in $(PKGPATH)"
 	@exit 1
 endif
-ifeq ($(wildcard $(PKGPATH)/wine-lol-glibc-$(glibc_VERSION)-x86_64.pkg.tar.xz),)
+ifeq ($(wildcard $(PKGPATH)/wine-lol-headless-glibc-$(glibc_VERSION)-x86_64.pkg.tar.zst),)
 	@echo "Wine-glibc package missing in $(PKGPATH)"
 	@exit 1
 endif
@@ -33,14 +33,14 @@ tempdir:
 	mkdir -p build/glibc/DEBIAN
 
 .PHONY: wine glibc
-wine glibc: ARCHPKG=$($@_NAME)-$($@_VERSION)-x86_64.pkg.tar.xz
+wine glibc: ARCHPKG=$($@_NAME)-$($@_VERSION)-x86_64.pkg.tar.zst
 wine glibc: DEBPATH=$($@_NAME)_$($@_VERSION)_i386.deb
 wine glibc:
 # Extract Arch package to build directory. Only take the opt/* part of it
 	bsdtar -vxf "$(PKGPATH)/$(ARCHPKG)" --include='opt/*' -C "build/$@"
 
 # Blacklist libcrypt*.so* for Debian/Ubuntu as they use libcrypt1
-	rm -f build/glibc/opt/wine-lol/lib32/libcrypt*.so*
+	rm -f build/glibc/opt/wine-lol-headless/lib32/libcrypt*.so*
 
 # Create the md5sums file
 	pushd "build/$@"; find * -type f ! -path 'DEBIAN/*' -exec md5sum '{}' \; > "DEBIAN/md5sums"

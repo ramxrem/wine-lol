@@ -1,4 +1,4 @@
-Package: wine-lol-glibc
+Package: wine-lol-headless-glibc
 Version: $(VERSION)
 Architecture: i386
 Maintainer: Manuel Reimer <mail+arch@m-reimer.de>
@@ -8,4 +8,4 @@ Suggests:
 Priority: optional
 Multi-Arch: same
 Homepage: https://m-reimer.de/wine-lol
-Description: GNU C Library patched for wine-lol
+Description: GNU C Library patched for wine-lol-headless

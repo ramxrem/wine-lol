@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-#   wine-lol AUR Auto-Update script
+#   wine-lol-headless AUR Auto-Update script
 #   Copyright (C) 2020 Manuel Reimer <manuel.reimer@gmx.de>
 #
 #   This program is free software: you can redistribute it and/or modify
@@ -26,7 +26,7 @@
 #
 
 # AUR packages handled in this Git repository (full relative path).
-PKGLIST=('wine-lol' 'wine-lol-glibc')
+PKGLIST=('wine-lol-headless' 'wine-lol-headless-glibc')
 
 # Commit message-generator
 function CommitMessage {
